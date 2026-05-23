@@ -2,47 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Medication Reminder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediCare AI</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>💊 Medication Reminder</h1>
+  <div class="top">
+    <h1>💊 MediCare AI</h1>
+    <p>Smart Medicine Reminder System</p>
+  </div>
 
-    <label>Medicine Name</label>
+  <div class="card">
+
+    <label id="medicineLabel">Medicine Name</label>
     <input type="text" id="medicine">
 
-    <label>Reminder Time</label>
+    <label id="timeLabel">Reminder Time</label>
     <input type="time" id="time">
 
-    <label>Caregiver Number</label>
-    <input type="text" id="caregiver">
-
-    <label>Language</label>
-    <select id="language">
+    <label id="languageLabel">Select Language</label>
+    <select id="language" onchange="changeLanguage()">
       <option value="en">English</option>
       <option value="ta">Tamil</option>
       <option value="hi">Hindi</option>
       <option value="te">Telugu</option>
     </select>
 
-    <button onclick="setReminder()">Set Reminder</button>
-    <button onclick="markTaken()">Mark as Taken</button>
+    <label id="caregiverLabel">Caregiver Number</label>
+    <input type="tel" id="caregiver">
+
+    <button id="setBtn" onclick="setReminder()">Set Reminder</button>
+    <button id="takenBtn" onclick="markTaken()">Mark as Taken</button>
+
     <button onclick="callCaregiver()">Call Caregiver</button>
     <button onclick="callAmbulance()">Ambulance</button>
 
-    <h3 id="status">Status: Not set</h3>
-
-    <h4>⏰ Clock: <span id="clock"></span></h4>
-
-    <ul id="logList"></ul>
-
   </div>
 
-  <script src="script.js"></script>
+  <h3 id="status">Status: Not Set</h3>
+  <div>⏰ <span id="clock"></span></div>
+
+  <ul id="logList"></ul>
+
+</div>
+
+<audio id="alarm"
+src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-996.mp3"></audio>
+
+<script src="script.js"></script>
 
 </body>
 </html>
