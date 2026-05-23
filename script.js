@@ -1,119 +1,142 @@
-const labels = {
-  en: {
-    medicine: "Medicine Name",
-    time: "Reminder Time",
-    language: "Select Language",
-    caregiver: "Caregiver Number",
-    set: "Set Reminder",
-    taken: "Mark as Taken",
-    call: "Call Caregiver",
-    ambulance: "Ambulance",
-    reminder: "Time to take",
-    success: "Medicine Taken Successfully",
-    missed: "Patient missed medicine"
-  },
+/* ================= AUDIO UNLOCK (VERY IMPORTANT FOR APK) ================= */
+document.addEventListener("click", function () {
 
-  ta: {
-    medicine: "மருந்து பெயர்",
-    time: "நேரம்",
-    language: "மொழி",
-    caregiver: "பராமரிப்பாளர்",
-    set: "அமைக்கவும்",
-    taken: "எடுத்துக்கொண்டேன்",
-    call: "அழைக்கவும்",
-    ambulance: "அம்புலன்ஸ்",
-    reminder: "மருந்து நேரம்",
-    success: "மருந்து எடுத்துக்கொண்டார்",
-    missed: "மருந்து தவறவிட்டார்"
-  }
+  const audio = document.getElementById("alarm");
+
+  audio.play().then(() => {
+    audio.pause();
+    audio.currentTime = 0;
+  }).catch(() => {});
+
+}, { once: true });
+
+
+/* ================= LABELS ================= */
+
+const labels = {
+  en:{ reminder:"Time to take", success:"Medicine Taken Successfully", missed:"Patient missed medicine" },
+  ta:{ reminder:"மருந்து நேரம்", success:"மருந்து எடுத்துக்கொண்டார்", missed:"மருந்து தவறவிட்டார்" },
+  hi:{ reminder:"दवा का समय", success:"दवा ली गई", missed:"दवा छूट गई" },
+  te:{ reminder:"మందు సమయం", success:"మందు తీసుకున్నారు", missed:"మందు మర్చిపోయారు" }
 };
 
-let reminderTime = null;
-let active = false;
-let alarmInterval = null;
-let missTimeout = null;
+let reminderTriggered = false;
+let alarmInterval;
 
-/* CLOCK */
+
+/* ================= CLOCK ================= */
+
 setInterval(() => {
   document.getElementById("clock").innerText =
     new Date().toLocaleTimeString().slice(0,5);
 }, 1000);
 
-/* LOG */
-function log(msg) {
+
+/* ================= LOG ================= */
+
+function addLog(msg){
   const li = document.createElement("li");
   li.innerText = new Date().toLocaleTimeString() + " - " + msg;
   document.getElementById("logList").prepend(li);
 }
 
-/* SPEECH */
-function speak(text, lang) {
-  const msg = new SpeechSynthesisUtterance(text);
-  msg.lang = lang;
-  speechSynthesis.speak(msg);
-}
 
-/* LANGUAGE */
-function changeLanguage() {
-  const lang = document.getElementById("language").value;
+/* ================= SET REMINDER ================= */
 
-  document.getElementById("medicineLabel").innerText = labels[lang].medicine;
-  document.getElementById("timeLabel").innerText = labels[lang].time;
-  document.getElementById("languageLabel").innerText = labels[lang].language;
-  document.getElementById("caregiverLabel").innerText = labels[lang].caregiver;
-
-  document.getElementById("setBtn").innerText = labels[lang].set;
-  document.getElementById("takenBtn").innerText = labels[lang].taken;
-}
-
-/* SET REMINDER */
-function setReminder() {
+function setReminder(){
 
   const medicine = document.getElementById("medicine").value;
   const time = document.getElementById("time").value;
 
-  if (!medicine || !time) {
-    alert("Fill all fields");
+  if(!medicine || !time){
+    alert("Please fill all fields");
     return;
   }
 
-  reminderTime = time;
-  active = true;
+  localStorage.setItem("medicine", medicine);
+  localStorage.setItem("time", time);
+
+  reminderTriggered = false;
 
   document.getElementById("status").innerText =
-    "Reminder set for " + time;
+    "✅ Reminder set for " + time;
 
-  log("Reminder set: " + medicine);
+  addLog("Reminder set for " + medicine);
 }
 
-/* CHECK LOOP */
-setInterval(() => {
 
-  if (!active) return;
+/* ================= MARK TAKEN ================= */
+
+function markTaken(){
+
+  clearInterval(alarmInterval);
+
+  const audio = document.getElementById("alarm");
+  audio.pause();
+  audio.currentTime = 0;
+
+  speechSynthesis.cancel();
+
+  document.getElementById("status").innerText =
+    "✅ Medicine Taken Successfully";
+
+  addLog("Medicine taken");
+}
+
+
+/* ================= CHECK REMINDER ================= */
+
+function checkReminder(){
 
   const now = new Date().toTimeString().slice(0,5);
+  const savedTime = localStorage.getItem("time");
 
-  if (now === reminderTime) {
+  if(now === savedTime && !reminderTriggered){
 
-    active = false;
+    reminderTriggered = true;
 
-    const medicine = document.getElementById("medicine").value;
+    const medicine = localStorage.getItem("medicine");
     const lang = document.getElementById("language").value;
 
+    const audio = document.getElementById("alarm");
+
     document.getElementById("status").innerText =
-      labels[lang].reminder + " " + medicine;
+      "⏰ " + labels[lang].reminder + " " + medicine;
 
-    log("Reminder triggered");
+    addLog("Alarm started for " + medicine);
 
+    /* ================= APK SAFE ALARM LOOP ================= */
     alarmInterval = setInterval(() => {
 
-      speak("Take your medicine " + medicine, lang);
+      /* SOUND */
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
 
-      document.getElementById("alarm").play().catch(()=>{});
+      /* VOICE */
+      speechSynthesis.cancel();
+
+      const langMap = {
+        en: "en-US",
+        ta: "ta-IN",
+        hi: "hi-IN",
+        te: "te-IN"
+      };
+
+      const speech = new SpeechSynthesisUtterance(
+        labels[lang].reminder + " " + medicine
+      );
+
+      speech.lang = langMap[lang] || "en-US";
+
+      setTimeout(() => {
+        speechSynthesis.speak(speech);
+      }, 200);
 
     }, 5000);
 
-    missTimeout = setTimeout(() => {
+
+    /* ================= MISS ALERT ================= */
+    setTimeout(() => {
 
       clearInterval(alarmInterval);
 
@@ -123,43 +146,23 @@ setInterval(() => {
         labels[lang].missed + ": " + medicine
       );
 
-      log("Missed alert sent");
-
-      window.location.href =
-        "sms:" + caregiver + "?body=" + msg;
+      window.location.href = "sms:" + caregiver + "?body=" + msg;
 
     }, 60000);
+
   }
-
-}, 1000);
-
-/* MARK AS TAKEN */
-function markTaken() {
-
-  active = false;
-
-  clearInterval(alarmInterval);
-  clearTimeout(missTimeout);
-
-  speechSynthesis.cancel();
-
-  const audio = document.getElementById("alarm");
-  audio.pause();
-  audio.currentTime = 0;
-
-  document.getElementById("status").innerText =
-    "✅ Medicine Taken Successfully";
-
-  log("Medicine taken");
 }
 
-/* CALL */
-function callCaregiver() {
+setInterval(checkReminder, 1000);
+
+
+/* ================= CALL FUNCTIONS ================= */
+
+function callCaregiver(){
   const num = document.getElementById("caregiver").value;
   window.location.href = "tel:" + num;
 }
 
-/* AMBULANCE */
-function callAmbulance() {
+function callAmbulance(){
   window.location.href = "tel:108";
 }
