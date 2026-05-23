@@ -1,5 +1,35 @@
-/* ================= AUDIO UNLOCK (VERY IMPORTANT FOR APK) ================= */
-document.addEventListener("click", function () {
+const labels = {
+
+  en:{
+    reminder:"Time to take",
+    success:"Medicine Taken Successfully",
+    missed:"Patient missed medicine"
+  },
+
+  ta:{
+    reminder:"மருந்து நேரம்",
+    success:"மருந்து எடுத்துக்கொண்டார்",
+    missed:"மருந்து தவறவிட்டார்"
+  },
+
+  hi:{
+    reminder:"दवा का समय",
+    success:"दवा ली गई",
+    missed:"दवा छूट गई"
+  },
+
+  te:{
+    reminder:"మందు సమయం",
+    success:"మందు తీసుకున్నారు",
+    missed:"మందు మర్చిపోయారు"
+  }
+};
+
+let reminderTriggered = false;
+let alarmInterval;
+
+/* ================= APK / WEBVIEW AUDIO UNLOCK ================= */
+document.addEventListener("click", () => {
 
   const audio = document.getElementById("alarm");
 
@@ -8,24 +38,12 @@ document.addEventListener("click", function () {
     audio.currentTime = 0;
   }).catch(() => {});
 
+  speechSynthesis.resume();
+
 }, { once: true });
 
 
-/* ================= LABELS ================= */
-
-const labels = {
-  en:{ reminder:"Time to take", success:"Medicine Taken Successfully", missed:"Patient missed medicine" },
-  ta:{ reminder:"மருந்து நேரம்", success:"மருந்து எடுத்துக்கொண்டார்", missed:"மருந்து தவறவிட்டார்" },
-  hi:{ reminder:"दवा का समय", success:"दवा ली गई", missed:"दवा छूट गई" },
-  te:{ reminder:"మందు సమయం", success:"మందు తీసుకున్నారు", missed:"మందు మర్చిపోయారు" }
-};
-
-let reminderTriggered = false;
-let alarmInterval;
-
-
 /* ================= CLOCK ================= */
-
 setInterval(() => {
   document.getElementById("clock").innerText =
     new Date().toLocaleTimeString().slice(0,5);
@@ -33,7 +51,6 @@ setInterval(() => {
 
 
 /* ================= LOG ================= */
-
 function addLog(msg){
   const li = document.createElement("li");
   li.innerText = new Date().toLocaleTimeString() + " - " + msg;
@@ -42,14 +59,13 @@ function addLog(msg){
 
 
 /* ================= SET REMINDER ================= */
-
 function setReminder(){
 
   const medicine = document.getElementById("medicine").value;
   const time = document.getElementById("time").value;
 
   if(!medicine || !time){
-    alert("Please fill all fields");
+    alert("Fill all fields");
     return;
   }
 
@@ -61,12 +77,11 @@ function setReminder(){
   document.getElementById("status").innerText =
     "✅ Reminder set for " + time;
 
-  addLog("Reminder set for " + medicine);
+  addLog("Reminder set: " + medicine);
 }
 
 
-/* ================= MARK TAKEN ================= */
-
+/* ================= MARK AS TAKEN ================= */
 function markTaken(){
 
   clearInterval(alarmInterval);
@@ -84,8 +99,7 @@ function markTaken(){
 }
 
 
-/* ================= CHECK REMINDER ================= */
-
+/* ================= REMINDER CHECK ================= */
 function checkReminder(){
 
   const now = new Date().toTimeString().slice(0,5);
@@ -101,11 +115,11 @@ function checkReminder(){
     const audio = document.getElementById("alarm");
 
     document.getElementById("status").innerText =
-      "⏰ " + labels[lang].reminder + " " + medicine;
+      "⏰ " + labels[lang].reminder + " - " + medicine;
 
-    addLog("Alarm started for " + medicine);
+    addLog("Alarm started: " + medicine);
 
-    /* ================= APK SAFE ALARM LOOP ================= */
+    /* ================= SAFE ALARM LOOP FOR WEBVIEW ================= */
     alarmInterval = setInterval(() => {
 
       /* SOUND */
@@ -122,20 +136,20 @@ function checkReminder(){
         te: "te-IN"
       };
 
-      const speech = new SpeechSynthesisUtterance(
+      const msg = new SpeechSynthesisUtterance(
         labels[lang].reminder + " " + medicine
       );
 
-      speech.lang = langMap[lang] || "en-US";
+      msg.lang = langMap[lang] || "en-US";
 
       setTimeout(() => {
-        speechSynthesis.speak(speech);
-      }, 200);
+        speechSynthesis.speak(msg);
+      }, 250);
 
     }, 5000);
 
 
-    /* ================= MISS ALERT ================= */
+    /* ================= MISSED ALERT ================= */
     setTimeout(() => {
 
       clearInterval(alarmInterval);
@@ -156,8 +170,7 @@ function checkReminder(){
 setInterval(checkReminder, 1000);
 
 
-/* ================= CALL FUNCTIONS ================= */
-
+/* ================= CALL ================= */
 function callCaregiver(){
   const num = document.getElementById("caregiver").value;
   window.location.href = "tel:" + num;
