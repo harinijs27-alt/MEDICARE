@@ -1,218 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-  content="width=device-width, initial-scale=1.0">
-
-  <title>MediCare AI</title>
-
-  <link rel="stylesheet"
-  href="style.css">
-
-  <link rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-
+  <title>Medication Reminder</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <div class="top">
+    <h1>💊 Medication Reminder</h1>
 
-    <div class="logo">
-      <i class="fa-solid fa-heart-pulse"></i>
-    </div>
+    <label>Medicine Name</label>
+    <input type="text" id="medicine">
 
-    <h1>MediCare AI</h1>
+    <label>Reminder Time</label>
+    <input type="time" id="time">
 
-    <p class="subtitle">
-      AI Powered Smart Healthcare Assistant
-    </p>
+    <label>Caregiver Number</label>
+    <input type="text" id="caregiver">
 
-  </div>
+    <label>Language</label>
+    <select id="language">
+      <option value="en">English</option>
+      <option value="ta">Tamil</option>
+      <option value="hi">Hindi</option>
+      <option value="te">Telugu</option>
+    </select>
 
-  <div class="hero-image">
+    <button onclick="setReminder()">Set Reminder</button>
+    <button onclick="markTaken()">Mark as Taken</button>
+    <button onclick="callCaregiver()">Call Caregiver</button>
+    <button onclick="callAmbulance()">Ambulance</button>
 
-    <img
-    src="https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1200&auto=format&fit=crop">
+    <h3 id="status">Status: Not set</h3>
 
-    <div class="overlay">
+    <h4>⏰ Clock: <span id="clock"></span></h4>
 
-      <h2>Smart AI Healthcare</h2>
-
-      <p>
-        Intelligent medicine tracking
-        for patients and caregivers.
-      </p>
-
-    </div>
-
-  </div>
-
-  <div class="content">
-
-    <div class="clock" id="clock"></div>
-
-    <div class="input-group">
-
-      <label id="medicineLabel">
-        💊 Medicine Name
-      </label>
-
-      <input
-      type="text"
-      id="medicine"
-      placeholder="Enter medicine name">
-
-    </div>
-
-    <div class="input-group">
-
-      <label id="timeLabel">
-        ⏰ Reminder Time
-      </label>
-
-      <input
-      type="time"
-      id="time">
-
-    </div>
-
-    <div class="input-group">
-
-      <label id="languageLabel">
-        🌍 Select Language
-      </label>
-
-      <select
-      id="language"
-      onchange="changeLanguage()">
-
-        <option value="en">
-          English
-        </option>
-
-        <option value="ta">
-          தமிழ்
-        </option>
-
-        <option value="hi">
-          हिन्दी
-        </option>
-
-        <option value="te">
-          తెలుగు
-        </option>
-
-      </select>
-
-    </div>
-
-    <div class="input-group">
-
-      <label id="caregiverLabel">
-        📞 Caregiver Number
-      </label>
-
-      <input
-      type="tel"
-      id="caregiver"
-      placeholder="+91XXXXXXXXXX">
-
-    </div>
-
-    <button
-    class="btn primary"
-    onclick="setReminder()"
-    id="setBtn">
-
-      Set Reminder
-
-    </button>
-
-    <button
-    class="btn success"
-    onclick="markTaken()"
-    id="takenBtn">
-
-      Mark as Taken
-
-    </button>
-
-    <div class="button-row">
-
-      <button
-      class="btn emergency"
-      onclick="callCaregiver()"
-      id="callBtn">
-
-        Call Caregiver
-
-      </button>
-
-      <button
-      class="btn ambulance"
-      onclick="callAmbulance()"
-      id="ambulanceBtn">
-
-        Ambulance
-
-      </button>
-
-    </div>
-
-    <div
-    class="status-card"
-    id="status">
-
-      Reminder status will appear here.
-
-    </div>
-
-    <div class="logs">
-
-      <h3>
-        📋 Patient Logs
-      </h3>
-
-      <ul id="logList"></ul>
-
-    </div>
-
-    <div class="ai-card">
-
-      🤖 AI Health Tip:<br><br>
-
-      Drink enough water,
-      maintain proper sleep,
-      and take medicines on time
-      for faster recovery.
-
-    </div>
+    <ul id="logList"></ul>
 
   </div>
 
-</div>
-
-<!-- LOCAL APK FRIENDLY AUDIO -->
-
-<audio
-id="alarm"
-preload="auto">
-
-<source
-src="alarm.mp3"
-type="audio/mpeg">
-
-</audio>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 
 </body>
-
 </html>
