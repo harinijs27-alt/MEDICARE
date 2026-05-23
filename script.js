@@ -1,181 +1,314 @@
 const labels = {
 
   en:{
+    medicine:"Medicine Name",
+    time:"Reminder Time",
+    language:"Select Language",
+    caregiver:"Caregiver Number",
+    set:"Set Reminder",
+    taken:"Mark as Taken",
+    call:"Call Caregiver",
+    ambulance:"Ambulance",
     reminder:"Time to take",
     success:"Medicine Taken Successfully",
     missed:"Patient missed medicine"
   },
 
   ta:{
-    reminder:"மருந்து நேரம்",
-    success:"மருந்து எடுத்துக்கொண்டார்",
-    missed:"மருந்து தவறவிட்டார்"
+    medicine:"மருந்து பெயர்",
+    time:"நினைவூட்டும் நேரம்",
+    language:"மொழியை தேர்ந்தெடுக்கவும்",
+    caregiver:"பராமரிப்பாளர் எண்",
+    set:"நினைவூட்டலை அமைக்கவும்",
+    taken:"மருந்து எடுத்துக்கொண்டேன்",
+    call:"அழைக்கவும்",
+    ambulance:"ஆம்புலன்ஸ்",
+    reminder:"மருந்து எடுத்துக்கொள்ள நேரம்",
+    success:"மருந்து வெற்றிகரமாக எடுத்துக்கொள்ளப்பட்டது",
+    missed:"நோயாளர் மருந்தை தவறவிட்டார்"
   },
 
   hi:{
-    reminder:"दवा का समय",
-    success:"दवा ली गई",
-    missed:"दवा छूट गई"
+    medicine:"दवा का नाम",
+    time:"रिमाइंडर समय",
+    language:"भाषा चुनें",
+    caregiver:"देखभालकर्ता नंबर",
+    set:"रिमाइंडर सेट करें",
+    taken:"दवा ले ली",
+    call:"कॉल करें",
+    ambulance:"एम्बुलेंस",
+    reminder:"दवा लेने का समय",
+    success:"दवा सफलतापूर्वक ली गई",
+    missed:"रोगी दवा लेना भूल गया"
   },
 
   te:{
-    reminder:"మందు సమయం",
-    success:"మందు తీసుకున్నారు",
-    missed:"మందు మర్చిపోయారు"
+    medicine:"మందు పేరు",
+    time:"రిమైండర్ సమయం",
+    language:"భాష ఎంచుకోండి",
+    caregiver:"కేర్ గివర్ నంబర్",
+    set:"రిమైండర్ సెట్ చేయండి",
+    taken:"మందు తీసుకున్నాను",
+    call:"కాల్ చేయండి",
+    ambulance:"అంబులెన్స్",
+    reminder:"మందు తీసుకునే సమయం",
+    success:"మందు విజయవంతంగా తీసుకున్నారు",
+    missed:"రోగి మందు మర్చిపోయారు"
   }
+
 };
 
 let reminderTriggered = false;
+
 let alarmInterval;
 
-/* ================= APK / WEBVIEW AUDIO UNLOCK ================= */
-document.addEventListener("click", () => {
+function updateClock(){
 
-  const audio = document.getElementById("alarm");
+  const now = new Date();
 
-  audio.play().then(() => {
-    audio.pause();
-    audio.currentTime = 0;
-  }).catch(() => {});
+  document.getElementById("clock")
+  .innerHTML =
+  now.toLocaleTimeString();
 
-  speechSynthesis.resume();
-
-}, { once: true });
-
-
-/* ================= CLOCK ================= */
-setInterval(() => {
-  document.getElementById("clock").innerText =
-    new Date().toLocaleTimeString().slice(0,5);
-}, 1000);
-
-
-/* ================= LOG ================= */
-function addLog(msg){
-  const li = document.createElement("li");
-  li.innerText = new Date().toLocaleTimeString() + " - " + msg;
-  document.getElementById("logList").prepend(li);
 }
 
+setInterval(updateClock,1000);
 
-/* ================= SET REMINDER ================= */
+function changeLanguage(){
+
+  const lang =
+  document.getElementById("language").value;
+
+  document.getElementById("medicineLabel")
+  .innerHTML =
+  "💊 " + labels[lang].medicine;
+
+  document.getElementById("timeLabel")
+  .innerHTML =
+  "⏰ " + labels[lang].time;
+
+  document.getElementById("languageLabel")
+  .innerHTML =
+  "🌍 " + labels[lang].language;
+
+  document.getElementById("caregiverLabel")
+  .innerHTML =
+  "📞 " + labels[lang].caregiver;
+
+  document.getElementById("setBtn")
+  .innerHTML =
+  labels[lang].set;
+
+  document.getElementById("takenBtn")
+  .innerHTML =
+  labels[lang].taken;
+
+  document.getElementById("callBtn")
+  .innerHTML =
+  labels[lang].call;
+
+  document.getElementById("ambulanceBtn")
+  .innerHTML =
+  labels[lang].ambulance;
+
+}
+
+function addLog(message){
+
+  const li =
+  document.createElement("li");
+
+  li.innerHTML =
+  `${new Date().toLocaleTimeString()}
+  - ${message}`;
+
+  document.getElementById("logList")
+  .prepend(li);
+
+}
+
 function setReminder(){
 
-  const medicine = document.getElementById("medicine").value;
-  const time = document.getElementById("time").value;
+  const medicine =
+  document.getElementById("medicine").value;
+
+  const time =
+  document.getElementById("time").value;
 
   if(!medicine || !time){
-    alert("Fill all fields");
+
+    alert("Please fill all fields");
+
     return;
+
   }
 
-  localStorage.setItem("medicine", medicine);
-  localStorage.setItem("time", time);
+  localStorage.setItem(
+    "medicine",
+    medicine
+  );
+
+  localStorage.setItem(
+    "time",
+    time
+  );
 
   reminderTriggered = false;
 
-  document.getElementById("status").innerText =
-    "✅ Reminder set for " + time;
+  document.getElementById("status")
+  .innerHTML =
+  `✅ Reminder set for ${time}`;
 
-  addLog("Reminder set: " + medicine);
+  addLog(
+    `Reminder created for ${medicine}`
+  );
+
 }
 
-
-/* ================= MARK AS TAKEN ================= */
 function markTaken(){
 
   clearInterval(alarmInterval);
 
-  const audio = document.getElementById("alarm");
+  const medicine =
+  localStorage.getItem("medicine");
+
+  const lang =
+  document.getElementById("language").value;
+
+  const audio =
+  document.getElementById("alarm");
+
   audio.pause();
+
   audio.currentTime = 0;
 
   speechSynthesis.cancel();
 
-  document.getElementById("status").innerText =
-    "✅ Medicine Taken Successfully";
+  document.getElementById("status")
+  .innerHTML =
+  `✅ ${labels[lang].success}`;
 
-  addLog("Medicine taken");
+  addLog(
+    `${medicine} taken successfully`
+  );
+
 }
 
-
-/* ================= REMINDER CHECK ================= */
 function checkReminder(){
 
-  const now = new Date().toTimeString().slice(0,5);
-  const savedTime = localStorage.getItem("time");
+  const current =
+  new Date()
+  .toTimeString()
+  .substring(0,5);
 
-  if(now === savedTime && !reminderTriggered){
+  const savedTime =
+  localStorage.getItem("time");
+
+  if(
+    current === savedTime &&
+    !reminderTriggered
+  ){
 
     reminderTriggered = true;
 
-    const medicine = localStorage.getItem("medicine");
-    const lang = document.getElementById("language").value;
+    const medicine =
+    localStorage.getItem("medicine");
 
-    const audio = document.getElementById("alarm");
+    const lang =
+    document.getElementById("language").value;
 
-    document.getElementById("status").innerText =
-      "⏰ " + labels[lang].reminder + " - " + medicine;
+    const audio =
+    document.getElementById("alarm");
 
-    addLog("Alarm started: " + medicine);
+    // Continuous alarm every 5 seconds
+    alarmInterval = setInterval(()=>{
 
-    /* ================= SAFE ALARM LOOP FOR WEBVIEW ================= */
-    alarmInterval = setInterval(() => {
-
-      /* SOUND */
       audio.currentTime = 0;
-      audio.play().catch(() => {});
 
-      /* VOICE */
-      speechSynthesis.cancel();
+      audio.play();
 
-      const langMap = {
-        en: "en-US",
-        ta: "ta-IN",
-        hi: "hi-IN",
-        te: "te-IN"
-      };
-
-      const msg = new SpeechSynthesisUtterance(
-        labels[lang].reminder + " " + medicine
+      const speech =
+      new SpeechSynthesisUtterance(
+        `${labels[lang].reminder}
+        ${medicine}`
       );
 
-      msg.lang = langMap[lang] || "en-US";
+      speech.lang = lang;
 
-      setTimeout(() => {
-        speechSynthesis.speak(msg);
-      }, 250);
+      speechSynthesis.speak(speech);
 
-    }, 5000);
+    },5000);
 
+    document.getElementById("status")
+    .innerHTML =
+    `⏰ ${labels[lang].reminder}
+    ${medicine}`;
 
-    /* ================= MISSED ALERT ================= */
-    setTimeout(() => {
+    addLog(
+      `Reminder alert started for ${medicine}`
+    );
+
+    // Stop after 1 minute
+    setTimeout(()=>{
 
       clearInterval(alarmInterval);
 
-      const caregiver = document.getElementById("caregiver").value;
+      const status =
+      document.getElementById("status")
+      .innerHTML;
 
-      const msg = encodeURIComponent(
-        labels[lang].missed + ": " + medicine
-      );
+      if(status.includes("⏰")){
 
-      window.location.href = "sms:" + caregiver + "?body=" + msg;
+        const caregiver =
+        document.getElementById("caregiver").value;
 
-    }, 60000);
+        const smsText =
+        encodeURIComponent(
+          `${labels[lang].missed}: ${medicine}`
+        );
+
+        addLog(
+          `Caregiver SMS alert triggered`
+        );
+
+        window.location.href =
+        `sms:${caregiver}?body=${smsText}`;
+
+      }
+
+    },60000);
 
   }
+
 }
 
-setInterval(checkReminder, 1000);
+setInterval(checkReminder,1000);
 
-
-/* ================= CALL ================= */
 function callCaregiver(){
-  const num = document.getElementById("caregiver").value;
-  window.location.href = "tel:" + num;
+
+  const caregiver =
+  document.getElementById("caregiver").value;
+
+  if(caregiver){
+
+    addLog(
+      `Calling caregiver`
+    );
+
+    window.location.href =
+    `tel:${caregiver}`;
+
+  }
+
 }
 
 function callAmbulance(){
-  window.location.href = "tel:108";
+
+  addLog(
+    `Calling ambulance service`
+  );
+
+  window.location.href =
+  "tel:108";
+
 }
