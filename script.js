@@ -62,6 +62,24 @@ let reminderTriggered = false;
 
 let alarmInterval;
 
+// Unlock audio for APK
+document.body.addEventListener("click",()=>{
+
+  const audio =
+  document.getElementById("alarm");
+
+  audio.play()
+  .then(()=>{
+
+    audio.pause();
+
+    audio.currentTime = 0;
+
+  })
+  .catch(()=>{});
+
+},{once:true});
+
 function updateClock(){
 
   const now = new Date();
@@ -182,8 +200,6 @@ function markTaken(){
 
   audio.currentTime = 0;
 
-  speechSynthesis.cancel();
-
   document.getElementById("status")
   .innerHTML =
   `✅ ${labels[lang].success}`;
@@ -225,17 +241,24 @@ function checkReminder(){
 
       audio.currentTime = 0;
 
-      audio.play();
+      audio.play()
+      .then(()=>{
 
-      const speech =
-      new SpeechSynthesisUtterance(
-        `${labels[lang].reminder}
-        ${medicine}`
-      );
+        console.log("Alarm playing");
 
-      speech.lang = lang;
+      })
+      .catch((err)=>{
 
-      speechSynthesis.speak(speech);
+        console.log("Audio blocked:",err);
+
+      });
+
+      // Phone vibration
+      if(navigator.vibrate){
+
+        navigator.vibrate([500,300,500]);
+
+      }
 
     },5000);
 
