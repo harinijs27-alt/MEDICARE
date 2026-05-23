@@ -1,155 +1,40 @@
-const labels = {
+let reminderTime = null;
+let reminderActive = false;
 
-  en: {
-    medicine: "Medicine Name",
-    time: "Reminder Time",
-    language: "Select Language",
-    caregiver: "Caregiver Number",
-    set: "Set Reminder",
-    taken: "Mark as Taken",
-    call: "Call Caregiver",
-    ambulance: "Ambulance",
-    reminder: "Time to take",
-    success: "Medicine Taken Successfully",
-    missed: "Patient missed medicine"
-  },
+let alarmInterval = null;
+let timeoutHandle = null;
 
-  ta: {
-    medicine: "மருந்து பெயர்",
-    time: "நினைவூட்டும் நேரம்",
-    language: "மொழியை தேர்ந்தெடுக்கவும்",
-    caregiver: "பராமரிப்பாளர் எண்",
-    set: "நினைவூட்டலை அமைக்கவும்",
-    taken: "மருந்து எடுத்துக்கொண்டேன்",
-    call: "அழைக்கவும்",
-    ambulance: "ஆம்புலன்ஸ்",
-    reminder: "மருந்து எடுத்துக்கொள்ள நேரம்",
-    success: "மருந்து வெற்றிகரமாக எடுத்துக்கொள்ளப்பட்டது",
-    missed: "நோயாளர் மருந்தை தவறவிட்டார்"
-  },
+/* CLOCK */
+setInterval(() => {
+  document.getElementById("clock").innerText =
+    new Date().toLocaleTimeString();
+}, 1000);
 
-  hi: {
-    medicine: "दवा का नाम",
-    time: "रिमाइंडर समय",
-    language: "भाषा चुनें",
-    caregiver: "देखभालकर्ता नंबर",
-    set: "रिमाइंडर सेट करें",
-    taken: "दवा ले ली",
-    call: "कॉल करें",
-    ambulance: "एम्बुलेंस",
-    reminder: "दवा लेने का समय",
-    success: "दवा सफलतापूर्वक ली गई",
-    missed: "रोगी दवा लेना भूल गया"
-  },
-
-  te: {
-    medicine: "మందు పేరు",
-    time: "రిమైండర్ సమయం",
-    language: "భాష ఎంచుకోండి",
-    caregiver: "కేర్ గివర్ నంబర్",
-    set: "రిమైండర్ సెట్ చేయండి",
-    taken: "మందు తీసుకున్నాను",
-    call: "కాల్ చేయండి",
-    ambulance: "అంబులెన్స్",
-    reminder: "మందు తీసుకునే సమయం",
-    success: "మందు విజయవంతంగా తీసుకున్నారు",
-    missed: "రోగి మందు మర్చిపోయారు"
-  }
-
-};
-
-let reminderTriggered = false;
-let alarmInterval;
-let audioCtx;
-
-/* ---------------- CLOCK ---------------- */
-
-function updateClock() {
-  const now = new Date();
-  document.getElementById("clock").innerHTML =
-    now.toLocaleTimeString();
-}
-
-setInterval(updateClock, 1000);
-
-/* ---------------- AUDIO SYSTEM (NO FILE NEEDED) ---------------- */
-
-function beep() {
-  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-
-  const oscillator = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-
-  oscillator.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  oscillator.type = "sine";
-  oscillator.frequency.value = 1000;
-
-  gain.gain.value = 1;
-
-  oscillator.start();
-  oscillator.stop(audioCtx.currentTime + 0.25);
-}
-
-function startAlarmSound() {
-  alarmInterval = setInterval(() => {
-    beep();
-
-    if (navigator.vibrate) {
-      navigator.vibrate([500, 300, 500]);
-    }
-  }, 600);
-}
-
-function stopAlarmSound() {
-  clearInterval(alarmInterval);
-}
-
-/* ---------------- LANGUAGE ---------------- */
-
-function changeLanguage() {
-
-  const lang = document.getElementById("language").value;
-
-  document.getElementById("medicineLabel").innerHTML =
-    "💊 " + labels[lang].medicine;
-
-  document.getElementById("timeLabel").innerHTML =
-    "⏰ " + labels[lang].time;
-
-  document.getElementById("languageLabel").innerHTML =
-    "🌍 " + labels[lang].language;
-
-  document.getElementById("caregiverLabel").innerHTML =
-    "📞 " + labels[lang].caregiver;
-
-  document.getElementById("setBtn").innerHTML =
-    labels[lang].set;
-
-  document.getElementById("takenBtn").innerHTML =
-    labels[lang].taken;
-
-  document.getElementById("callBtn").innerHTML =
-    labels[lang].call;
-
-  document.getElementById("ambulanceBtn").innerHTML =
-    labels[lang].ambulance;
-}
-
-/* ---------------- LOG ---------------- */
-
-function addLog(message) {
+/* LOG */
+function addLog(msg) {
   const li = document.createElement("li");
-
-  li.innerHTML =
-    `${new Date().toLocaleTimeString()} - ${message}`;
-
+  li.innerText = new Date().toLocaleTimeString() + " - " + msg;
   document.getElementById("logList").prepend(li);
 }
 
-/* ---------------- SET REMINDER ---------------- */
+/* VOICE */
+function speak(text, lang) {
 
+  const msg = new SpeechSynthesisUtterance();
+  msg.text = text;
+
+  const voices = {
+    en: "en-US",
+    ta: "ta-IN",
+    hi: "hi-IN",
+    te: "te-IN"
+  };
+
+  msg.lang = voices[lang] || "en-US";
+  window.speechSynthesis.speak(msg);
+}
+
+/* SET REMINDER */
 function setReminder() {
 
   const medicine = document.getElementById("medicine").value;
@@ -160,97 +45,89 @@ function setReminder() {
     return;
   }
 
-  localStorage.setItem("medicine", medicine);
-  localStorage.setItem("time", time);
+  reminderTime = time;
+  reminderActive = true;
 
-  reminderTriggered = false;
+  document.getElementById("status").innerText =
+    "Reminder set for " + time;
 
-  document.getElementById("status").innerHTML =
-    `✅ Reminder set for ${time}`;
-
-  addLog(`Reminder created for ${medicine}`);
+  addLog("Reminder set for " + medicine);
 }
 
-/* ---------------- MARK TAKEN ---------------- */
+/* CHECK LOOP */
+setInterval(() => {
 
-function markTaken() {
+  if (!reminderActive) return;
 
-  stopAlarmSound();
+  const now = new Date().toTimeString().slice(0, 5);
 
-  const medicine = localStorage.getItem("medicine");
-  const lang = document.getElementById("language").value;
+  if (now === reminderTime) {
 
-  document.getElementById("status").innerHTML =
-    `✅ ${labels[lang].success}`;
+    reminderActive = false;
 
-  addLog(`${medicine} taken successfully`);
-}
-
-/* ---------------- CHECK REMINDER ---------------- */
-
-function checkReminder() {
-
-  const current =
-    new Date().toTimeString().substring(0, 5);
-
-  const savedTime = localStorage.getItem("time");
-
-  if (current === savedTime && !reminderTriggered) {
-
-    reminderTriggered = true;
-
-    const medicine = localStorage.getItem("medicine");
+    const medicine = document.getElementById("medicine").value;
     const lang = document.getElementById("language").value;
 
-    startAlarmSound();
+    document.getElementById("status").innerText =
+      "⏰ Time to take " + medicine;
 
-    document.getElementById("status").innerHTML =
-      `⏰ ${labels[lang].reminder} ${medicine}`;
+    addLog("Reminder triggered for " + medicine);
 
-    addLog(`Reminder alert started for ${medicine}`);
+    /* VOICE LOOP */
+    alarmInterval = setInterval(() => {
+      speak("Time to take your medicine " + medicine, lang);
 
-    /* STOP AFTER 1 MINUTE IF NOT TAKEN */
-    setTimeout(() => {
+      if (navigator.vibrate) {
+        navigator.vibrate([500, 300, 500]);
+      }
+    }, 5000);
 
-      stopAlarmSound();
+    /* MISSED CHECK */
+    timeoutHandle = setTimeout(() => {
+
+      if (alarmInterval) clearInterval(alarmInterval);
 
       const caregiver = document.getElementById("caregiver").value;
 
       const smsText = encodeURIComponent(
-        `${labels[lang].missed}: ${medicine}`
+        "Missed medicine: " + medicine
       );
 
-      addLog(`Caregiver SMS alert triggered`);
+      addLog("Missed medicine alert sent");
 
       window.location.href =
-        `sms:${caregiver}?body=${smsText}`;
+        "sms:" + caregiver + "?body=" + smsText;
 
     }, 60000);
   }
+
+}, 1000);
+
+/* MARK AS TAKEN */
+function markTaken() {
+
+  const medicine = document.getElementById("medicine").value;
+
+  reminderActive = false;
+
+  if (alarmInterval) clearInterval(alarmInterval);
+  if (timeoutHandle) clearTimeout(timeoutHandle);
+
+  window.speechSynthesis.cancel();
+
+  document.getElementById("status").innerText =
+    "✅ Medicine Taken Successfully";
+
+  addLog(medicine + " taken successfully");
 }
 
-setInterval(checkReminder, 1000);
-
-/* ---------------- CALLS ---------------- */
-
+/* CALL CAREGIVER */
 function callCaregiver() {
-
-  const caregiver = document.getElementById("caregiver").value;
-
-  if (caregiver) {
-    addLog("Calling caregiver");
-    window.location.href = `tel:${caregiver}`;
-  }
+  const num = document.getElementById("caregiver").value;
+  window.location.href = "tel:" + num;
 }
 
+/* AMBULANCE */
 function callAmbulance() {
-  addLog("Calling ambulance service");
   window.location.href = "tel:108";
 }
-
-/* ---------------- AUDIO UNLOCK (IMPORTANT FOR APK/BROWSER) ---------------- */
-
-document.body.addEventListener("click", () => {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  audioCtx.resume();
-}, { once: true });
