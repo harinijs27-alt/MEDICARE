@@ -1,337 +1,256 @@
 const labels = {
 
-  en:{
-    medicine:"Medicine Name",
-    time:"Reminder Time",
-    language:"Select Language",
-    caregiver:"Caregiver Number",
-    set:"Set Reminder",
-    taken:"Mark as Taken",
-    call:"Call Caregiver",
-    ambulance:"Ambulance",
-    reminder:"Time to take",
-    success:"Medicine Taken Successfully",
-    missed:"Patient missed medicine"
+  en: {
+    medicine: "Medicine Name",
+    time: "Reminder Time",
+    language: "Select Language",
+    caregiver: "Caregiver Number",
+    set: "Set Reminder",
+    taken: "Mark as Taken",
+    call: "Call Caregiver",
+    ambulance: "Ambulance",
+    reminder: "Time to take",
+    success: "Medicine Taken Successfully",
+    missed: "Patient missed medicine"
   },
 
-  ta:{
-    medicine:"மருந்து பெயர்",
-    time:"நினைவூட்டும் நேரம்",
-    language:"மொழியை தேர்ந்தெடுக்கவும்",
-    caregiver:"பராமரிப்பாளர் எண்",
-    set:"நினைவூட்டலை அமைக்கவும்",
-    taken:"மருந்து எடுத்துக்கொண்டேன்",
-    call:"அழைக்கவும்",
-    ambulance:"ஆம்புலன்ஸ்",
-    reminder:"மருந்து எடுத்துக்கொள்ள நேரம்",
-    success:"மருந்து வெற்றிகரமாக எடுத்துக்கொள்ளப்பட்டது",
-    missed:"நோயாளர் மருந்தை தவறவிட்டார்"
+  ta: {
+    medicine: "மருந்து பெயர்",
+    time: "நினைவூட்டும் நேரம்",
+    language: "மொழியை தேர்ந்தெடுக்கவும்",
+    caregiver: "பராமரிப்பாளர் எண்",
+    set: "நினைவூட்டலை அமைக்கவும்",
+    taken: "மருந்து எடுத்துக்கொண்டேன்",
+    call: "அழைக்கவும்",
+    ambulance: "ஆம்புலன்ஸ்",
+    reminder: "மருந்து எடுத்துக்கொள்ள நேரம்",
+    success: "மருந்து வெற்றிகரமாக எடுத்துக்கொள்ளப்பட்டது",
+    missed: "நோயாளர் மருந்தை தவறவிட்டார்"
   },
 
-  hi:{
-    medicine:"दवा का नाम",
-    time:"रिमाइंडर समय",
-    language:"भाषा चुनें",
-    caregiver:"देखभालकर्ता नंबर",
-    set:"रिमाइंडर सेट करें",
-    taken:"दवा ले ली",
-    call:"कॉल करें",
-    ambulance:"एम्बुलेंस",
-    reminder:"दवा लेने का समय",
-    success:"दवा सफलतापूर्वक ली गई",
-    missed:"रोगी दवा लेना भूल गया"
+  hi: {
+    medicine: "दवा का नाम",
+    time: "रिमाइंडर समय",
+    language: "भाषा चुनें",
+    caregiver: "देखभालकर्ता नंबर",
+    set: "रिमाइंडर सेट करें",
+    taken: "दवा ले ली",
+    call: "कॉल करें",
+    ambulance: "एम्बुलेंस",
+    reminder: "दवा लेने का समय",
+    success: "दवा सफलतापूर्वक ली गई",
+    missed: "रोगी दवा लेना भूल गया"
   },
 
-  te:{
-    medicine:"మందు పేరు",
-    time:"రిమైండర్ సమయం",
-    language:"భాష ఎంచుకోండి",
-    caregiver:"కేర్ గివర్ నంబర్",
-    set:"రిమైండర్ సెట్ చేయండి",
-    taken:"మందు తీసుకున్నాను",
-    call:"కాల్ చేయండి",
-    ambulance:"అంబులెన్స్",
-    reminder:"మందు తీసుకునే సమయం",
-    success:"మందు విజయవంతంగా తీసుకున్నారు",
-    missed:"రోగి మందు మర్చిపోయారు"
+  te: {
+    medicine: "మందు పేరు",
+    time: "రిమైండర్ సమయం",
+    language: "భాష ఎంచుకోండి",
+    caregiver: "కేర్ గివర్ నంబర్",
+    set: "రిమైండర్ సెట్ చేయండి",
+    taken: "మందు తీసుకున్నాను",
+    call: "కాల్ చేయండి",
+    ambulance: "అంబులెన్స్",
+    reminder: "మందు తీసుకునే సమయం",
+    success: "మందు విజయవంతంగా తీసుకున్నారు",
+    missed: "రోగి మందు మర్చిపోయారు"
   }
 
 };
 
 let reminderTriggered = false;
-
 let alarmInterval;
+let audioCtx;
 
-// Unlock audio for APK
-document.body.addEventListener("click",()=>{
+/* ---------------- CLOCK ---------------- */
 
-  const audio =
-  document.getElementById("alarm");
-
-  audio.play()
-  .then(()=>{
-
-    audio.pause();
-
-    audio.currentTime = 0;
-
-  })
-  .catch(()=>{});
-
-},{once:true});
-
-function updateClock(){
-
+function updateClock() {
   const now = new Date();
-
-  document.getElementById("clock")
-  .innerHTML =
-  now.toLocaleTimeString();
-
+  document.getElementById("clock").innerHTML =
+    now.toLocaleTimeString();
 }
 
-setInterval(updateClock,1000);
+setInterval(updateClock, 1000);
 
-function changeLanguage(){
+/* ---------------- AUDIO SYSTEM (NO FILE NEEDED) ---------------- */
 
-  const lang =
-  document.getElementById("language").value;
+function beep() {
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
 
-  document.getElementById("medicineLabel")
-  .innerHTML =
-  "💊 " + labels[lang].medicine;
+  const oscillator = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
 
-  document.getElementById("timeLabel")
-  .innerHTML =
-  "⏰ " + labels[lang].time;
+  oscillator.connect(gain);
+  gain.connect(audioCtx.destination);
 
-  document.getElementById("languageLabel")
-  .innerHTML =
-  "🌍 " + labels[lang].language;
+  oscillator.type = "sine";
+  oscillator.frequency.value = 1000;
 
-  document.getElementById("caregiverLabel")
-  .innerHTML =
-  "📞 " + labels[lang].caregiver;
+  gain.gain.value = 1;
 
-  document.getElementById("setBtn")
-  .innerHTML =
-  labels[lang].set;
-
-  document.getElementById("takenBtn")
-  .innerHTML =
-  labels[lang].taken;
-
-  document.getElementById("callBtn")
-  .innerHTML =
-  labels[lang].call;
-
-  document.getElementById("ambulanceBtn")
-  .innerHTML =
-  labels[lang].ambulance;
-
+  oscillator.start();
+  oscillator.stop(audioCtx.currentTime + 0.25);
 }
 
-function addLog(message){
+function startAlarmSound() {
+  alarmInterval = setInterval(() => {
+    beep();
 
-  const li =
-  document.createElement("li");
+    if (navigator.vibrate) {
+      navigator.vibrate([500, 300, 500]);
+    }
+  }, 600);
+}
+
+function stopAlarmSound() {
+  clearInterval(alarmInterval);
+}
+
+/* ---------------- LANGUAGE ---------------- */
+
+function changeLanguage() {
+
+  const lang = document.getElementById("language").value;
+
+  document.getElementById("medicineLabel").innerHTML =
+    "💊 " + labels[lang].medicine;
+
+  document.getElementById("timeLabel").innerHTML =
+    "⏰ " + labels[lang].time;
+
+  document.getElementById("languageLabel").innerHTML =
+    "🌍 " + labels[lang].language;
+
+  document.getElementById("caregiverLabel").innerHTML =
+    "📞 " + labels[lang].caregiver;
+
+  document.getElementById("setBtn").innerHTML =
+    labels[lang].set;
+
+  document.getElementById("takenBtn").innerHTML =
+    labels[lang].taken;
+
+  document.getElementById("callBtn").innerHTML =
+    labels[lang].call;
+
+  document.getElementById("ambulanceBtn").innerHTML =
+    labels[lang].ambulance;
+}
+
+/* ---------------- LOG ---------------- */
+
+function addLog(message) {
+  const li = document.createElement("li");
 
   li.innerHTML =
-  `${new Date().toLocaleTimeString()}
-  - ${message}`;
+    `${new Date().toLocaleTimeString()} - ${message}`;
 
-  document.getElementById("logList")
-  .prepend(li);
-
+  document.getElementById("logList").prepend(li);
 }
 
-function setReminder(){
+/* ---------------- SET REMINDER ---------------- */
 
-  const medicine =
-  document.getElementById("medicine").value;
+function setReminder() {
 
-  const time =
-  document.getElementById("time").value;
+  const medicine = document.getElementById("medicine").value;
+  const time = document.getElementById("time").value;
 
-  if(!medicine || !time){
-
+  if (!medicine || !time) {
     alert("Please fill all fields");
-
     return;
-
   }
 
-  localStorage.setItem(
-    "medicine",
-    medicine
-  );
-
-  localStorage.setItem(
-    "time",
-    time
-  );
+  localStorage.setItem("medicine", medicine);
+  localStorage.setItem("time", time);
 
   reminderTriggered = false;
 
-  document.getElementById("status")
-  .innerHTML =
-  `✅ Reminder set for ${time}`;
+  document.getElementById("status").innerHTML =
+    `✅ Reminder set for ${time}`;
 
-  addLog(
-    `Reminder created for ${medicine}`
-  );
-
+  addLog(`Reminder created for ${medicine}`);
 }
 
-function markTaken(){
+/* ---------------- MARK TAKEN ---------------- */
 
-  clearInterval(alarmInterval);
+function markTaken() {
 
-  const medicine =
-  localStorage.getItem("medicine");
+  stopAlarmSound();
 
-  const lang =
-  document.getElementById("language").value;
+  const medicine = localStorage.getItem("medicine");
+  const lang = document.getElementById("language").value;
 
-  const audio =
-  document.getElementById("alarm");
+  document.getElementById("status").innerHTML =
+    `✅ ${labels[lang].success}`;
 
-  audio.pause();
-
-  audio.currentTime = 0;
-
-  document.getElementById("status")
-  .innerHTML =
-  `✅ ${labels[lang].success}`;
-
-  addLog(
-    `${medicine} taken successfully`
-  );
-
+  addLog(`${medicine} taken successfully`);
 }
 
-function checkReminder(){
+/* ---------------- CHECK REMINDER ---------------- */
+
+function checkReminder() {
 
   const current =
-  new Date()
-  .toTimeString()
-  .substring(0,5);
+    new Date().toTimeString().substring(0, 5);
 
-  const savedTime =
-  localStorage.getItem("time");
+  const savedTime = localStorage.getItem("time");
 
-  if(
-    current === savedTime &&
-    !reminderTriggered
-  ){
+  if (current === savedTime && !reminderTriggered) {
 
     reminderTriggered = true;
 
-    const medicine =
-    localStorage.getItem("medicine");
+    const medicine = localStorage.getItem("medicine");
+    const lang = document.getElementById("language").value;
 
-    const lang =
-    document.getElementById("language").value;
+    startAlarmSound();
 
-    const audio =
-    document.getElementById("alarm");
+    document.getElementById("status").innerHTML =
+      `⏰ ${labels[lang].reminder} ${medicine}`;
 
-    // Continuous alarm every 5 seconds
-    alarmInterval = setInterval(()=>{
+    addLog(`Reminder alert started for ${medicine}`);
 
-      audio.currentTime = 0;
+    /* STOP AFTER 1 MINUTE IF NOT TAKEN */
+    setTimeout(() => {
 
-      audio.play()
-      .then(()=>{
+      stopAlarmSound();
 
-        console.log("Alarm playing");
+      const caregiver = document.getElementById("caregiver").value;
 
-      })
-      .catch((err)=>{
+      const smsText = encodeURIComponent(
+        `${labels[lang].missed}: ${medicine}`
+      );
 
-        console.log("Audio blocked:",err);
+      addLog(`Caregiver SMS alert triggered`);
 
-      });
-
-      // Phone vibration
-      if(navigator.vibrate){
-
-        navigator.vibrate([500,300,500]);
-
-      }
-
-    },5000);
-
-    document.getElementById("status")
-    .innerHTML =
-    `⏰ ${labels[lang].reminder}
-    ${medicine}`;
-
-    addLog(
-      `Reminder alert started for ${medicine}`
-    );
-
-    // Stop after 1 minute
-    setTimeout(()=>{
-
-      clearInterval(alarmInterval);
-
-      const status =
-      document.getElementById("status")
-      .innerHTML;
-
-      if(status.includes("⏰")){
-
-        const caregiver =
-        document.getElementById("caregiver").value;
-
-        const smsText =
-        encodeURIComponent(
-          `${labels[lang].missed}: ${medicine}`
-        );
-
-        addLog(
-          `Caregiver SMS alert triggered`
-        );
-
-        window.location.href =
+      window.location.href =
         `sms:${caregiver}?body=${smsText}`;
 
-      }
-
-    },60000);
-
+    }, 60000);
   }
-
 }
 
-setInterval(checkReminder,1000);
+setInterval(checkReminder, 1000);
 
-function callCaregiver(){
+/* ---------------- CALLS ---------------- */
 
-  const caregiver =
-  document.getElementById("caregiver").value;
+function callCaregiver() {
 
-  if(caregiver){
+  const caregiver = document.getElementById("caregiver").value;
 
-    addLog(
-      `Calling caregiver`
-    );
-
-    window.location.href =
-    `tel:${caregiver}`;
-
+  if (caregiver) {
+    addLog("Calling caregiver");
+    window.location.href = `tel:${caregiver}`;
   }
-
 }
 
-function callAmbulance(){
-
-  addLog(
-    `Calling ambulance service`
-  );
-
-  window.location.href =
-  "tel:108";
-
+function callAmbulance() {
+  addLog("Calling ambulance service");
+  window.location.href = "tel:108";
 }
+
+/* ---------------- AUDIO UNLOCK (IMPORTANT FOR APK/BROWSER) ---------------- */
+
+document.body.addEventListener("click", () => {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx.resume();
+}, { once: true });
