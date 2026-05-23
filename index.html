@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
 
   <title>MediCare AI</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet"
+  href="style.css">
 
   <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
 </head>
 
 <body>
@@ -32,14 +38,16 @@
 
   <div class="hero-image">
 
-    <img src="https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1200&auto=format&fit=crop">
+    <img
+    src="https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1200&auto=format&fit=crop">
 
     <div class="overlay">
 
       <h2>Smart AI Healthcare</h2>
 
       <p>
-        Intelligent medicine tracking for patients and caregivers.
+        Intelligent medicine tracking
+        for patients and caregivers.
       </p>
 
     </div>
@@ -69,7 +77,9 @@
         ⏰ Reminder Time
       </label>
 
-      <input type="time" id="time">
+      <input
+      type="time"
+      id="time">
 
     </div>
 
@@ -79,7 +89,8 @@
         🌍 Select Language
       </label>
 
-      <select id="language"
+      <select
+      id="language"
       onchange="changeLanguage()">
 
         <option value="en">
@@ -177,8 +188,10 @@
 
       🤖 AI Health Tip:<br><br>
 
-      Drink enough water, maintain proper sleep,
-      and take medicines on time for faster recovery.
+      Drink enough water,
+      maintain proper sleep,
+      and take medicines on time
+      for faster recovery.
 
     </div>
 
@@ -186,12 +199,20 @@
 
 </div>
 
+<!-- LOCAL APK FRIENDLY AUDIO -->
+
 <audio
 id="alarm"
-src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-996.mp3">
+preload="auto">
+
+<source
+src="alarm.mp3"
+type="audio/mpeg">
+
 </audio>
 
 <script src="script.js"></script>
 
 </body>
+
 </html>
