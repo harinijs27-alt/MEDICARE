@@ -1,37 +1,69 @@
-let reminderTime = null;
-let reminderActive = false;
+const labels = {
+  en: {
+    medicine: "Medicine Name",
+    time: "Reminder Time",
+    language: "Select Language",
+    caregiver: "Caregiver Number",
+    set: "Set Reminder",
+    taken: "Mark as Taken",
+    call: "Call Caregiver",
+    ambulance: "Ambulance",
+    reminder: "Time to take",
+    success: "Medicine Taken Successfully",
+    missed: "Patient missed medicine"
+  },
 
+  ta: {
+    medicine: "மருந்து பெயர்",
+    time: "நேரம்",
+    language: "மொழி",
+    caregiver: "பராமரிப்பாளர்",
+    set: "அமைக்கவும்",
+    taken: "எடுத்துக்கொண்டேன்",
+    call: "அழைக்கவும்",
+    ambulance: "அம்புலன்ஸ்",
+    reminder: "மருந்து நேரம்",
+    success: "மருந்து எடுத்துக்கொண்டார்",
+    missed: "மருந்து தவறவிட்டார்"
+  }
+};
+
+let reminderTime = null;
+let active = false;
 let alarmInterval = null;
-let timeoutHandle = null;
+let missTimeout = null;
 
 /* CLOCK */
 setInterval(() => {
   document.getElementById("clock").innerText =
-    new Date().toLocaleTimeString();
+    new Date().toLocaleTimeString().slice(0,5);
 }, 1000);
 
 /* LOG */
-function addLog(msg) {
+function log(msg) {
   const li = document.createElement("li");
   li.innerText = new Date().toLocaleTimeString() + " - " + msg;
   document.getElementById("logList").prepend(li);
 }
 
-/* VOICE */
+/* SPEECH */
 function speak(text, lang) {
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = lang;
+  speechSynthesis.speak(msg);
+}
 
-  const msg = new SpeechSynthesisUtterance();
-  msg.text = text;
+/* LANGUAGE */
+function changeLanguage() {
+  const lang = document.getElementById("language").value;
 
-  const voices = {
-    en: "en-US",
-    ta: "ta-IN",
-    hi: "hi-IN",
-    te: "te-IN"
-  };
+  document.getElementById("medicineLabel").innerText = labels[lang].medicine;
+  document.getElementById("timeLabel").innerText = labels[lang].time;
+  document.getElementById("languageLabel").innerText = labels[lang].language;
+  document.getElementById("caregiverLabel").innerText = labels[lang].caregiver;
 
-  msg.lang = voices[lang] || "en-US";
-  window.speechSynthesis.speak(msg);
+  document.getElementById("setBtn").innerText = labels[lang].set;
+  document.getElementById("takenBtn").innerText = labels[lang].taken;
 }
 
 /* SET REMINDER */
@@ -41,62 +73,60 @@ function setReminder() {
   const time = document.getElementById("time").value;
 
   if (!medicine || !time) {
-    alert("Please fill all fields");
+    alert("Fill all fields");
     return;
   }
 
   reminderTime = time;
-  reminderActive = true;
+  active = true;
 
   document.getElementById("status").innerText =
     "Reminder set for " + time;
 
-  addLog("Reminder set for " + medicine);
+  log("Reminder set: " + medicine);
 }
 
 /* CHECK LOOP */
 setInterval(() => {
 
-  if (!reminderActive) return;
+  if (!active) return;
 
-  const now = new Date().toTimeString().slice(0, 5);
+  const now = new Date().toTimeString().slice(0,5);
 
   if (now === reminderTime) {
 
-    reminderActive = false;
+    active = false;
 
     const medicine = document.getElementById("medicine").value;
     const lang = document.getElementById("language").value;
 
     document.getElementById("status").innerText =
-      "⏰ Time to take " + medicine;
+      labels[lang].reminder + " " + medicine;
 
-    addLog("Reminder triggered for " + medicine);
+    log("Reminder triggered");
 
-    /* VOICE LOOP */
     alarmInterval = setInterval(() => {
-      speak("Time to take your medicine " + medicine, lang);
 
-      if (navigator.vibrate) {
-        navigator.vibrate([500, 300, 500]);
-      }
+      speak("Take your medicine " + medicine, lang);
+
+      document.getElementById("alarm").play().catch(()=>{});
+
     }, 5000);
 
-    /* MISSED CHECK */
-    timeoutHandle = setTimeout(() => {
+    missTimeout = setTimeout(() => {
 
-      if (alarmInterval) clearInterval(alarmInterval);
+      clearInterval(alarmInterval);
 
       const caregiver = document.getElementById("caregiver").value;
 
-      const smsText = encodeURIComponent(
-        "Missed medicine: " + medicine
+      const msg = encodeURIComponent(
+        labels[lang].missed + ": " + medicine
       );
 
-      addLog("Missed medicine alert sent");
+      log("Missed alert sent");
 
       window.location.href =
-        "sms:" + caregiver + "?body=" + smsText;
+        "sms:" + caregiver + "?body=" + msg;
 
     }, 60000);
   }
@@ -106,22 +136,24 @@ setInterval(() => {
 /* MARK AS TAKEN */
 function markTaken() {
 
-  const medicine = document.getElementById("medicine").value;
+  active = false;
 
-  reminderActive = false;
+  clearInterval(alarmInterval);
+  clearTimeout(missTimeout);
 
-  if (alarmInterval) clearInterval(alarmInterval);
-  if (timeoutHandle) clearTimeout(timeoutHandle);
+  speechSynthesis.cancel();
 
-  window.speechSynthesis.cancel();
+  const audio = document.getElementById("alarm");
+  audio.pause();
+  audio.currentTime = 0;
 
   document.getElementById("status").innerText =
     "✅ Medicine Taken Successfully";
 
-  addLog(medicine + " taken successfully");
+  log("Medicine taken");
 }
 
-/* CALL CAREGIVER */
+/* CALL */
 function callCaregiver() {
   const num = document.getElementById("caregiver").value;
   window.location.href = "tel:" + num;
